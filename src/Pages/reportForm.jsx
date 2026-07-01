@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 
 import  {
   Box,
@@ -66,7 +67,8 @@ export default function ReportForm() {
 
     >
 
-      {/* HEADER */}
+{/* HEADER */}
+
 <Paper
   elevation={0}
   sx={{
@@ -106,20 +108,50 @@ export default function ReportForm() {
     }}
   />
 
-  <ArrowBackIosNewRoundedIcon
-    onClick={() => navigate("/home")}
+  <Box
     sx={{
-      color: "#16A34A",
-      cursor: "pointer"
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      mb: 3,
+      position: "relative",
+      zIndex: 1
     }}
-  />
+  >
+    <ArrowBackIosNewRoundedIcon
+      onClick={() => navigate("/home")}
+      sx={{
+        color: "#16A34A",
+        cursor: "pointer"
+      }}
+    />
+
+    <Button
+      variant="outlined"
+      color="error"
+      size="small"
+      startIcon={<LogoutRoundedIcon />}
+      onClick={() => {
+        localStorage.removeItem("dni");
+        navigate("/");
+      }}
+      sx={{
+        borderRadius: 2,
+        textTransform: "none",
+        fontWeight: 600
+      }}
+    >
+      Salir
+    </Button>
+  </Box>
 
   <Typography
     sx={{
-      mt: 3,
       fontSize: 26,
       fontWeight: 700,
-      color: "#1F2937"
+      color: "#1F2937",
+      position: "relative",
+      zIndex: 1
     }}
   >
     Nueva solicitud
@@ -129,7 +161,9 @@ export default function ReportForm() {
     sx={{
       color: "#64748B",
       fontSize: 14,
-      mb: 3
+      mb: 3,
+      position: "relative",
+      zIndex: 1
     }}
   >
     Reporte de novedades
@@ -144,7 +178,9 @@ export default function ReportForm() {
       py: 1,
       borderRadius: 20,
       background: "#F8FAFC",
-      border: "1px solid #E2E8F0"
+      border: "1px solid #E2E8F0",
+      position: "relative",
+      zIndex: 1
     }}
   >
     <AccountCircleRoundedIcon

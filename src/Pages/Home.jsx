@@ -3,6 +3,8 @@ import {
   Typography,
   Paper
 } from "@mui/material";
+import Button from "@mui/material/Button";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
@@ -27,31 +29,59 @@ export default function Home() {
       }}
     >
 
-      {/* Header */}
+{/* Header */}
 
-      <Box sx={{ mb: 5 }}>
+<Box
+  sx={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    mb: 5
+  }}
+>
 
-        <Typography
-          sx={{
-            fontSize: 26,
-            fontWeight: 800,
-            color: "#1F2937"
-          }}
-        >
-          MANTENIMIENTO COMA SA
-        </Typography>
+  <Box>
 
-        <Typography
-          sx={{
-            mt: 1,
-            color: "#64748B",
-            fontSize: 15
-          }}
-        >
-          Sistema de Reporte de Novedades
-        </Typography>
+    <Typography
+      sx={{
+        fontSize: 26,
+        fontWeight: 800,
+        color: "#1F2937"
+      }}
+    >
+      MANTENIMIENTO COMA SA
+    </Typography>
 
-      </Box>
+    <Typography
+      sx={{
+        mt: 1,
+        color: "#64748B",
+        fontSize: 15
+      }}
+    >
+      Sistema de Reporte de Novedades
+    </Typography>
+
+  </Box>
+
+  <Button
+    variant="outlined"
+    color="error"
+    startIcon={<LogoutRoundedIcon />}
+    onClick={() => {
+      localStorage.removeItem("dni");
+      navigate("/");
+    }}
+    sx={{
+      borderRadius: 2,
+      textTransform: "none",
+      fontWeight: 600
+    }}
+  >
+    Salir
+  </Button>
+
+</Box>
 
       {/* Bienvenida */}
 
