@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import emailjs from "@emailjs/browser";
 
 import  {
   Box,
@@ -24,30 +25,90 @@ export default function ReportForm() {
 
   const [formulario, setFormulario] = useState({
 
-    interno: "",
-    equipo: "",
-    obra: "",
-    horas: "",
+  interno: "",
+  equipo: "",
+  obra: "",
+  horas: "",
+  sistema: "",
+  criticidad: "",
+  detenido: "",
+  descripcion: ""
 
-    sistema: "",
-    criticidad: "",
-    detenido: "",
+});
 
-    descripcion: ""
+const handleChange = (e) => {
+
+  setFormulario({
+
+    ...formulario,
+
+    [e.target.name]: e.target.value
 
   });
 
-  const handleChange = (e) => {
+};
 
-    setFormulario({
+const enviarReporte = () => {
 
-      ...formulario,
+  const fecha = new Date();
 
-      [e.target.name]: e.target.value
+  const parametros = {
 
-    });
+    correo: localStorage.getItem("correo"),
+
+    dni: dni,
+
+    equipo: formulario.equipo,
+
+    interno: formulario.interno,
+
+    obra: formulario.obra,
+
+    horas: formulario.horas,
+
+    sistema: formulario.sistema,
+
+    criticidad: formulario.criticidad,
+
+    detenido: formulario.detenido,
+
+    descripcion: formulario.descripcion,
+
+    fecha: fecha.toLocaleDateString("es-AR"),
+
+    hora: fecha.toLocaleTimeString("es-AR")
 
   };
+
+  emailjs.send(
+
+    "service_q4olojs",
+
+    "template_pkwo1pj",
+
+    parametros,
+
+    "J8VbYGxQmJyTpuJWP"
+
+  )
+
+  .then(() => {
+
+    alert("✅ Reporte enviado correctamente");
+
+    navigate("/home");
+
+  })
+
+  .catch((error) => {
+
+    console.log(error);
+
+    alert("Error al enviar el reporte");
+
+  });
+
+};
 
   return (
 
@@ -497,42 +558,45 @@ export default function ReportForm() {
         </Button>
 
       </Paper>
+<Button
 
-      <Button
+  fullWidth
 
-        fullWidth
+  variant="contained"
 
-        variant="contained"
 
-        sx={{
+  onClick={enviarReporte}
 
-          py: 1.8,
+  sx={{
 
-          borderRadius: 3,
+    py: 1.8,
 
-          background: "#16A34A",
+    borderRadius: 3,
 
-          fontWeight: 700,
+    background: "#16A34A",
 
-          fontSize: 16,
+    fontWeight: 700,
 
-          textTransform: "none",
+    fontSize: 16,
 
-          boxShadow: "0 8px 18px rgba(22,163,74,0.25)",
+    textTransform: "none",
 
-          "&:hover": {
+    boxShadow: "0 8px 18px rgba(22,163,74,0.25)",
 
-            background: "#15803D"
+    "&:hover": {
 
-          }
+      background: "#15803D"
 
-        }}
+    }
 
-      >
+  }}
 
-        Enviar solicitud
+>
 
-      </Button>
+  Enviar solicitud
+
+</Button>
+
 
     </Box>
 
