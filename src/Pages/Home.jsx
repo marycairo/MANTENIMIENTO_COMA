@@ -5,6 +5,7 @@ import {
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
@@ -185,6 +186,84 @@ export default function Home() {
         />
 
       </Paper>
+
+      {/* Reporte semanal de horómetros */}
+
+<Paper
+
+  elevation={0}
+
+  onClick={() => navigate("/horometros")}
+
+  sx={{
+
+    display: "flex",
+
+    alignItems: "center",
+
+    p: 2.5,
+
+    mb: 2,
+
+    borderRadius: 3,
+
+    border: "1px solid #DDEDE4",
+
+    cursor: "pointer",
+
+    transition: ".2s",
+
+    "&:hover": {
+
+      borderColor: "#16A34A",
+
+      background: "#FAFCFB"
+
+    }
+
+  }}
+
+>
+
+  <SpeedRoundedIcon
+
+    sx={{
+
+      color: "#16A34A",
+
+      fontSize: 34,
+
+      mr: 2
+
+    }}
+
+  />
+
+  <Box flex={1}>
+
+    <Typography fontWeight={700}>
+      Reporte semanal de horómetros
+    </Typography>
+
+    <Typography
+      sx={{
+        color: "#64748B",
+        fontSize: 14,
+        mt: .3
+      }}
+    >
+      Informar las horas actuales de cada equipo.
+    </Typography>
+
+  </Box>
+
+  <ChevronRightRoundedIcon
+    sx={{
+      color: "#94A3B8"
+    }}
+  />
+
+</Paper>
 
       {/* Historial */}
 

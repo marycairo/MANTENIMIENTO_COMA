@@ -1,41 +1,57 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   Box,
-  Chip,
   Paper,
+  Tab,
+  Tabs,
   Typography
 } from "@mui/material";
 
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 
-const reportes = [
+const novedades = [
   {
     id: 1,
     equipo: "Grúa 201",
     sistema: "Sistema hidráulico",
-    fecha: "27/06/2026",
-    estado: "Pendiente"
+    fecha: "27/06/2026"
   },
   {
     id: 2,
     equipo: "Grúa 154",
     sistema: "Motor",
-    fecha: "26/06/2026",
-    estado: "En proceso"
+    fecha: "26/06/2026"
   },
   {
     id: 3,
     equipo: "Grúa 089",
     sistema: "Sistema eléctrico",
-    fecha: "24/06/2026",
-    estado: "Resuelto"
+    fecha: "24/06/2026"
+  }
+];
+
+const horometros = [
+  {
+    id: 1,
+    obra: "YPF Loma Campana",
+    motivo: "Carga fuera del análisis",
+    fecha: "27/06/2026"
+  },
+  {
+    id: 2,
+    obra: "Pan American Energy",
+    motivo: "Sin observaciones",
+    fecha: "20/06/2026"
   }
 ];
 
 export default function Historial() {
 
   const navigate = useNavigate();
+
+  const [tab, setTab] = useState(0);
 
   return (
 
@@ -54,15 +70,13 @@ export default function Historial() {
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: 4,
+          borderRadius: 5,
           border: "1px solid #DDEDE4",
           background: "#FFFFFF",
           position: "relative",
           overflow: "hidden"
         }}
       >
-
-        {/* Fondo decorativo */}
 
         <Box
           sx={{
@@ -120,157 +134,143 @@ export default function Historial() {
             color: "#64748B"
           }}
         >
-          Consulte el estado de los reportes enviados.
+          Consulte los reportes enviados.
         </Typography>
 
-        {/* Resumen */}
-
-        <Box
+        <Tabs
+          value={tab}
+          onChange={(e, value) => setTab(value)}
           sx={{
-            display: "flex",
-            gap: 1,
             mt: 3,
-            flexWrap: "wrap"
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#16A34A",
+              height: 3,
+              borderRadius: 5
+            }
           }}
         >
 
-          <Chip
-            label="1 Pendiente"
-            color="error"
-            size="small"
+          <Tab
+            label="Novedades"
+            sx={{
+              textTransform: "none",
+              fontWeight: 700
+            }}
           />
 
-          <Chip
-            label="1 En proceso"
-            color="warning"
-            size="small"
+          <Tab
+            label="Horómetros"
+            sx={{
+              textTransform: "none",
+              fontWeight: 700
+            }}
           />
 
-          <Chip
-            label="1 Resuelto"
-            color="success"
-            size="small"
-          />
-
-        </Box>
+        </Tabs>
 
       </Paper>
 
-      {/* TARJETAS */}
+      {/* HISTORIAL NOVEDADES */}
 
-      {
+      {tab === 0 && (
 
-        reportes.map((reporte) => (
+        novedades.map((reporte) => (
 
           <Paper
-
             key={reporte.id}
-
             elevation={0}
-
             sx={{
-
               p: 2.5,
-
               mb: 2,
-
               borderRadius: 4,
-
               border: "1px solid #DDEDE4"
-
             }}
-
           >
 
-            <Box
-
-              display="flex"
-
-              justifyContent="space-between"
-
-              alignItems="center"
-
-              mb={2}
-
-            >
-
-              <Typography
-
-                sx={{
-
-                  fontWeight: 700,
-
-                  fontSize: 18
-
-                }}
-
-              >
-
-                {reporte.equipo}
-
-              </Typography>
-
-              <Chip
-
-                label={reporte.estado}
-
-                size="small"
-
-                color={
-
-                  reporte.estado === "Resuelto"
-
-                    ? "success"
-
-                    : reporte.estado === "Pendiente"
-
-                    ? "error"
-
-                    : "warning"
-
-                }
-
-              />
-
-            </Box>
-
             <Typography
-
               sx={{
-
-                color: "#475569",
-
+                fontWeight: 700,
+                fontSize: 18,
                 mb: 1
-
               }}
-
             >
-
-              {reporte.sistema}
-
+              {reporte.equipo}
             </Typography>
 
             <Typography
-
               sx={{
-
-                color: "#94A3B8",
-
-                fontSize: 13
-
+                color: "#475569",
+                mb: 1
               }}
-
             >
+              {reporte.sistema}
+            </Typography>
 
+            <Typography
+              sx={{
+                color: "#94A3B8",
+                fontSize: 13
+              }}
+            >
               {reporte.fecha}
-
             </Typography>
 
           </Paper>
 
         ))
 
-      }
+      )}
+
+      {/* HISTORIAL HORÓMETROS */}
+
+      {tab === 1 && (
+
+        horometros.map((reporte) => (
+
+          <Paper
+            key={reporte.id}
+            elevation={0}
+            sx={{
+              p: 2.5,
+              mb: 2,
+              borderRadius: 4,
+              border: "1px solid #DDEDE4"
+            }}
+          >
+
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: 18,
+                mb: 1
+              }}
+            >
+              {reporte.obra}
+            </Typography>
+
+            <Typography
+              sx={{
+                color: "#475569",
+                mb: 1
+              }}
+            >
+              {reporte.motivo}
+            </Typography>
+
+            <Typography
+              sx={{
+                color: "#94A3B8",
+                fontSize: 13
+              }}
+            >
+              {reporte.fecha}
+            </Typography>
+
+          </Paper>
+
+        ))
+
+      )}
 
     </Box>
 
