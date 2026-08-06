@@ -16,16 +16,51 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const ingresar = () => {
+const ingresar = async () => {
 
-    if (!correo || !dni) return;
+   if (!correo || !dni) {
 
-    localStorage.setItem("correo", correo);
-    localStorage.setItem("dni", dni);
+      alert("Complete todos los campos");
 
-    navigate("/home");
+      return;
 
-  };
+   }
+
+   try {
+
+      const response = await fetch(
+         "https://default56df1b06d1b74f83a8dcdb4e6ad0ab.79.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/5b0b30da7a624486b9d1833ea5098022/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1zBghZskGlnNHy4Nu3IVfkZndzvFtj0aFeP4J8i7OvM",
+         {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+               correo,
+               dni
+            })
+         }
+      );
+
+      const data = await response.json();
+
+      console.log(data);
+
+      localStorage.setItem("correo", correo);
+      localStorage.setItem("dni", dni);
+
+      navigate("/home");
+
+   } catch (error) {
+
+      console.error(error);
+
+      alert("Error al conectar con el servidor.");
+
+   }
+
+};
+
 
   return (
 
