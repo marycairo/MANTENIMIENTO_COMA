@@ -17,6 +17,7 @@ export default function Login() {
 
   const navigate = useNavigate();
 
+  // Mostrar error durante 2 segundos
   const mostrarError = (mensaje) => {
     setError(mensaje);
 
@@ -26,10 +27,10 @@ export default function Login() {
   };
 
   const ingresar = async () => {
-    // Limpiar mensaje anterior
+    // Limpiar error anterior
     setError("");
 
-    // Validar que haya datos
+    // Validar campos
     if (!correo.trim() || !dni.trim()) {
       mostrarError("Complete todos los campos.");
       return;
@@ -52,45 +53,87 @@ export default function Login() {
         }
       );
 
-      // Leer respuesta de Power Automate
-      const data = await response.json();
-
-      console.log("Respuesta Power Automate:", data);
-      console.log("Código HTTP:", response.status);
-
       /*
-       * SOLO PERMITIMOS EL INGRESO SI:
+       * Intentamos leer la respuesta.
        *
-       * 1. El servidor responde HTTP 200
-       * 2. El flujo devuelve ok: true
+       * Usamos text() primero porque un error 502 de
+       * Power Automate puede no devolver JSON válido.
        */
 
-      if (response.status !== 200 || data.ok !== true) {
-        mostrarError(
-          data.mensaje || "Usuario no autorizado."
+      const responseText = await response.text();
+
+      console.log(
+        "Código HTTP:",
+        response.status
+      );
+
+      console.log(
+        "Respuesta Power Automate:",
+        responseText
+      );
+
+      let data = {};
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = {};
+      }
+
+      /*
+       * ==========================================
+       * ÉXITO
+       * ==========================================
+       *
+       * Si Power Automate devuelve HTTP 200,
+       * permitimos el acceso.
+       */
+
+      if (response.status === 200) {
+        console.log(
+          "Login correcto. Usuario autorizado."
         );
+
+        // Guardar datos del usuario
+        localStorage.setItem(
+          "correo",
+          correo.trim()
+        );
+
+        localStorage.setItem(
+          "dni",
+          dni.trim()
+        );
+
+        // Ir al Home
+        navigate("/home");
 
         return;
       }
 
       /*
-       * USUARIO AUTORIZADO
+       * ==========================================
+       * ERROR
+       * ==========================================
        *
-       * Recién acá guardamos los datos.
+       * Cualquier código diferente de 200
+       * significa que NO permitimos el acceso.
        */
 
-      localStorage.setItem(
-        "correo",
-        correo.trim()
+      console.error(
+        "Login rechazado. Código:",
+        response.status,
+        data
       );
 
-      localStorage.setItem(
-        "dni",
-        dni.trim()
-      );
+      // Si Power Automate devuelve un mensaje,
+      // intentamos mostrarlo.
+      const mensajeError =
+        data?.mensaje ||
+        data?.error?.message ||
+        obtenerMensajeError(response.status);
 
-      // Ir al Home
-      navigate("/home");
+      mostrarError(mensajeError);
     } catch (error) {
       console.error(
         "Error al conectar con Power Automate:",
@@ -102,6 +145,48 @@ export default function Login() {
       );
     } finally {
       setCargando(false);
+    }
+  };
+
+  /*
+   * Mensajes según código HTTP
+   */
+
+  const obtenerMensajeError = (status) => {
+    switch (status) {
+      case 400:
+        return "Los datos enviados no son válidos.";
+
+      case 401:
+        return "Correo o DNI incorrectos.";
+
+      case 403:
+        return "No tiene autorización para ingresar.";
+
+      case 404:
+        return "No se encontró el recurso solicitado.";
+
+      case 500:
+        return "Error interno del servidor.";
+
+      case 502:
+        return "El servidor no respondió. Intente nuevamente.";
+
+      case 503:
+        return "El servicio no está disponible.";
+
+      default:
+        return `No se pudo iniciar sesión. Código: ${status}`;
+    }
+  };
+
+  /*
+   * Permitir presionar ENTER
+   */
+
+  const manejarEnter = (event) => {
+    if (event.key === "Enter" && !cargando) {
+      ingresar();
     }
   };
 
@@ -128,6 +213,7 @@ export default function Login() {
         }}
       >
         {/* LOGO */}
+
         <Box
           sx={{
             textAlign: "center",
@@ -179,6 +265,7 @@ export default function Login() {
         </Box>
 
         {/* CORREO */}
+
         <Typography
           sx={{
             mb: 1,
@@ -195,9 +282,11 @@ export default function Login() {
           placeholder="ejemplo@coma.com.ar"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
+          onKeyDown={manejarEnter}
           disabled={cargando}
           sx={{
             mb: 3,
+
             "& .MuiOutlinedInput-root": {
               borderRadius: 3,
               background: "#F8FAFC",
@@ -218,6 +307,7 @@ export default function Login() {
         />
 
         {/* DNI */}
+
         <Typography
           sx={{
             mb: 1,
@@ -234,9 +324,11 @@ export default function Login() {
           placeholder="Ej: 12345678"
           value={dni}
           onChange={(e) => setDni(e.target.value)}
+          onKeyDown={manejarEnter}
           disabled={cargando}
           sx={{
             mb: 2,
+
             "& .MuiOutlinedInput-root": {
               borderRadius: 3,
               background: "#F8FAFC",
@@ -257,6 +349,7 @@ export default function Login() {
         />
 
         {/* MENSAJE DE ERROR */}
+
         {error && (
           <Box
             sx={{
@@ -281,13 +374,16 @@ export default function Login() {
         )}
 
         {/* BOTÓN */}
+
         <Button
           fullWidth
           variant="contained"
           onClick={ingresar}
           disabled={cargando}
           endIcon={
-            !cargando ? <ArrowForwardIcon /> : null
+            !cargando ? (
+              <ArrowForwardIcon />
+            ) : null
           }
           sx={{
             py: 1.8,
@@ -311,10 +407,13 @@ export default function Login() {
             },
           }}
         >
-          {cargando ? "Verificando..." : "Continuar"}
+          {cargando
+            ? "Verificando..."
+            : "Continuar"}
         </Button>
 
         {/* TEXTO INFERIOR */}
+
         <Typography
           sx={{
             mt: 3,
