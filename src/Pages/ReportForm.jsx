@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import emailjs from "@emailjs/browser";
 
 import {
   Box,
@@ -23,6 +22,12 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 const ENDPOINT_INTERNOS =
   "https://default56df1b06d1b74f83a8dcdb4e6ad0ab.79.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/31/workflows/850a0f14a32349aab8f885b3840a4d9e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DoP6rQVb-q7-T_LX1j4pi2s_2J6XyVP_BtwqCEkYAV4";
 
+  // ======================================================
+// ENDPOINT PARA ENVIAR EL REPORTE
+// ======================================================
+
+const ENDPOINT_REPORTE =
+  "https://default56df1b06d1b74f83a8dcdb4e6ad0ab.79.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/24/workflows/af8c1384d3814ea8a0c8396e3476ffae/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Kx-rBa__2ZNGeJYAoi_X1b9rxvr09IY3UdFT7MUp7QE";
 // ======================================================
 // COMPONENTE
 // ======================================================
@@ -68,7 +73,7 @@ export default function ReportForm() {
   // ======================================================
 
   const [fotos, setFotos] = useState([]);
-
+const [enviando, setEnviando] = useState(false);
   // ======================================================
   // OBTENER INTERNOS DESDE POWER AUTOMATE
   // ======================================================
@@ -285,92 +290,297 @@ export default function ReportForm() {
   };
 
   // ======================================================
+// CONVERTIR IMAGEN A BASE64
+// ======================================================
+
+const convertirImagenBase64 = (archivo) => {
+
+  return new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      const resultado = reader.result;
+
+      // Quitamos:
+      // data:image/jpeg;base64,
+
+      const base64 = resultado.split(",")[1];
+
+      resolve(base64);
+
+    };
+
+    reader.onerror = (error) => {
+
+      reject(error);
+
+    };
+
+    reader.readAsDataURL(archivo);
+
+  });
+
+};
+
+  // ======================================================
   // ENVIAR REPORTE
   // ======================================================
 
-  const enviarReporte = () => {
+// ======================================================
+// ENVIAR REPORTE A POWER AUTOMATE
+// ======================================================
 
-    const fecha = new Date();
+const enviarReporte = async () => {
 
-    const parametros = {
+  // Evitar doble envío
+  if (enviando) {
+    return;
+  }
+
+  try {
+
+    // ==================================================
+    // VALIDACIONES
+    // ==================================================
+
+    if (!dni) {
+      alert("No se encontró el DNI del operador.");
+      return;
+    }
+
+    if (!formulario.interno) {
+      alert("Seleccione un interno.");
+      return;
+    }
+
+    if (!formulario.sistema) {
+      alert("Seleccione el sistema afectado.");
+      return;
+    }
+
+    if (!formulario.criticidad) {
+      alert("Seleccione la criticidad.");
+      return;
+    }
+
+    if (!formulario.detenido) {
+      alert("Indique si el equipo quedó detenido.");
+      return;
+    }
+
+    if (!formulario.descripcion.trim()) {
+      alert("Ingrese una descripción de la novedad.");
+      return;
+    }
+
+    // ==================================================
+    // ACTIVAR ESTADO DE ENVÍO
+    // ==================================================
+
+    setEnviando(true);
+
+    // ==================================================
+    // CONVERTIR FOTOGRAFÍAS A BASE64
+    // ==================================================
+
+    const imagenes = await Promise.all(
+
+      fotos.map(async (foto, index) => {
+
+        const contenido =
+          await convertirImagenBase64(foto);
+
+        return {
+          nombre:
+            foto.name ||
+            `evidencia_${String(index + 1).padStart(2, "0")}.jpg`,
+
+          contenido: contenido
+        };
+
+      })
+
+    );
+
+    // ==================================================
+    // DATOS QUE SE ENVÍAN A POWER AUTOMATE
+    //
+    // IMPORTANTE:
+    // NO SE ENVÍA "hora"
+    // NO SE ENVÍA "horas" POR AHORA
+    // ==================================================
+
+    const datosReporte = {
+
+      dni: dni,
 
       correo:
         localStorage.getItem("correo") || "",
 
-      dni: dni,
+      interno:
+        String(formulario.interno),
 
       equipo:
-        formulario.equipo,
+        formulario.equipo || "",
 
-      interno:
-        formulario.interno,
+      marca:
+        formulario.marca || "",
 
-      obra:
-        formulario.nombreObra,
+      modelo:
+        formulario.modelo || "",
 
-      horas:
-        formulario.horas,
+      codigoObra:
+        formulario.codigoObra || "",
 
-      sistema:
-        formulario.sistema,
+      nombreObra:
+        formulario.nombreObra || "",
+
+      sistemaAfectado:
+        formulario.sistema || "",
 
       criticidad:
-        formulario.criticidad,
+        formulario.criticidad || "",
 
-      detenido:
-        formulario.detenido,
+      equipoDetenido:
+        formulario.detenido || "",
 
       descripcion:
-        formulario.descripcion,
+        formulario.descripcion.trim(),
 
-      fecha:
-        fecha.toLocaleDateString("es-AR"),
-
-      hora:
-        fecha.toLocaleTimeString("es-AR")
+      imagenes:
+        imagenes
 
     };
 
+    // ==================================================
+    // MOSTRAR JSON EN CONSOLA
+    // ==================================================
+
     console.log(
-      "Datos enviados:",
-      parametros
+      "================================="
     );
 
     console.log(
-      "Fotografías seleccionadas:",
-      fotos
+      "DATOS ENVIADOS A POWER AUTOMATE:"
     );
 
-    emailjs.send(
-      "service_q4olojs",
-      "template_pkwo1pj",
-      parametros,
-      "J8VbYGxQmJyTpuJWP"
-    )
-      .then(() => {
+    console.log(
+      JSON.stringify(
+        datosReporte,
+        null,
+        2
+      )
+    );
 
-        alert(
-          "✅ Reporte enviado correctamente"
-        );
+    console.log(
+      "================================="
+    );
 
-        navigate("/home");
+    // ==================================================
+    // ENVIAR A POWER AUTOMATE
+    // ==================================================
 
-      })
-      .catch((error) => {
+    const respuesta = await fetch(
+      ENDPOINT_REPORTE,
+      {
+        method: "POST",
 
-        console.error(
-          "Error enviando reporte:",
-          error
-        );
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-        alert(
-          "Error al enviar el reporte"
-        );
+        body: JSON.stringify(
+          datosReporte
+        )
+      }
+    );
 
-      });
+    // ==================================================
+    // VERIFICAR RESPUESTA
+    // ==================================================
 
-  };
+    if (!respuesta.ok) {
 
+      const errorTexto =
+        await respuesta.text();
+
+      console.error(
+        "Power Automate respondió:",
+        errorTexto
+      );
+
+      throw new Error(
+        `Power Automate respondió con código ${respuesta.status}`
+      );
+
+    }
+
+    // ==================================================
+    // LEER RESPUESTA
+    // ==================================================
+
+    let resultado = null;
+
+    try {
+
+      resultado =
+        await respuesta.json();
+
+    } catch {
+
+      // Power Automate puede no devolver JSON
+
+    }
+
+    console.log(
+      "Respuesta de Power Automate:",
+      resultado
+    );
+
+    // ==================================================
+    // ÉXITO
+    // ==================================================
+
+    alert(
+      "✅ Reporte enviado correctamente"
+    );
+
+    navigate("/home");
+
+  } catch (error) {
+
+    console.error(
+      "================================="
+    );
+
+    console.error(
+      "ERROR ENVIANDO REPORTE:"
+    );
+
+    console.error(
+      error
+    );
+
+    console.error(
+      "================================="
+    );
+
+    alert(
+      "❌ No se pudo enviar el reporte. Verifique la conexión con el sistema."
+    );
+
+  } finally {
+
+    // Volvemos a habilitar el botón
+    setEnviando(false);
+
+  }
+
+
+
+};
   // ======================================================
   // INTERFAZ
   // ======================================================
@@ -1644,32 +1854,34 @@ export default function ReportForm() {
           ENVIAR
       ====================================================== */}
 
-      <Button
-        fullWidth
-        variant="contained"
-        onClick={enviarReporte}
-        disabled={
-          !formulario.interno ||
-          cargandoInternos
-        }
-        sx={{
-          py: 1.8,
-          borderRadius: 3,
-          background: "#16A34A",
-          fontWeight: 700,
-          fontSize: 16,
-          textTransform:
-            "none",
-          boxShadow:
-            "0 8px 18px rgba(22,163,74,0.25)",
+     <Button
+  fullWidth
+  variant="contained"
+  onClick={enviarReporte}
+  disabled={
+    !formulario.interno ||
+    cargandoInternos ||
+    enviando
+  }
+  sx={{
+    py: 1.8,
+    borderRadius: 3,
+    background: "#16A34A",
+    fontWeight: 700,
+    fontSize: 16,
+    textTransform: "none",
+    boxShadow:
+      "0 8px 18px rgba(22,163,74,0.25)",
 
-          "&:hover": {
-            background: "#15803D"
-          }
-        }}
-      >
-        Enviar solicitud
-      </Button>
+    "&:hover": {
+      background: "#15803D"
+    }
+  }}
+>
+  {enviando
+    ? "Enviando reporte..."
+    : "Enviar solicitud"}
+</Button>
 
     </Box>
 
