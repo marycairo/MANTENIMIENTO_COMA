@@ -17,10 +17,14 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 // ======================================================
-// PEGAR AQUÍ LA URL DE POWER AUTOMATE
+// URL DE POWER AUTOMATE
 // ======================================================
 
-const ENDPOINT_INTERNOS = "https://default56df1b06d1b74f83a8dcdb4e6ad0ab.79.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/31/workflows/850a0f14a32349aab8f885b3840a4d9e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DoP6rQVb-q7-T_LX1j4pi2s_2J6XyVP_BtwqCEkYAV4";
+const ENDPOINT_INTERNOS =
+  "https://default56df1b06d1b74f83a8dcdb4e6ad0ab.79.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/31/workflows/850a0f14a32349aab8f885b3840a4d9e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DoP6rQVb-q7-T_LX1j4pi2s_2J6XyVP_BtwqCEkYAV4";
+
+// ======================================================
+// COMPONENTE
 // ======================================================
 
 export default function ReportForm() {
@@ -29,44 +33,56 @@ export default function ReportForm() {
 
   const dni = localStorage.getItem("dni") || "";
 
-  // ------------------------------------------------------
+  // ======================================================
   // FORMULARIO
-  // ------------------------------------------------------
+  // ======================================================
 
   const [formulario, setFormulario] = useState({
-  interno: "",
-  equipo: "",
-  marca: "",
-  modelo: "",
-  codigoObra: "",
-  nombreObra: "",
-  horas: "",
-  sistema: "",
-  criticidad: "",
-  detenido: "",
-  descripcion: ""
-});
+    interno: "",
+    equipo: "",
+    marca: "",
+    modelo: "",
+    codigoObra: "",
+    nombreObra: "",
+    horas: "",
+    sistema: "",
+    criticidad: "",
+    detenido: "",
+    descripcion: ""
+  });
 
-  // ------------------------------------------------------
+  // ======================================================
   // INTERNOS DEL OPERADOR
-  // ------------------------------------------------------
+  // ======================================================
 
   const [internos, setInternos] = useState([]);
 
-  const [cargandoInternos, setCargandoInternos] = useState(false);
+  const [cargandoInternos, setCargandoInternos] =
+    useState(false);
 
-  const [errorInternos, setErrorInternos] = useState("");
+  const [errorInternos, setErrorInternos] =
+    useState("");
 
-  // ------------------------------------------------------
+  // ======================================================
+  // FOTOGRAFÍAS
+  // ======================================================
+
+  const [fotos, setFotos] = useState([]);
+
+  // ======================================================
   // OBTENER INTERNOS DESDE POWER AUTOMATE
-  // ------------------------------------------------------
+  // ======================================================
 
   useEffect(() => {
 
     const obtenerInternos = async () => {
 
       if (!dni) {
-        setErrorInternos("No se encontró el DNI del operador.");
+
+        setErrorInternos(
+          "No se encontró el DNI del operador."
+        );
+
         return;
       }
 
@@ -74,9 +90,11 @@ export default function ReportForm() {
         !ENDPOINT_INTERNOS ||
         ENDPOINT_INTERNOS === "PEGAR_AQUI_EL_ENDPOINT"
       ) {
+
         setErrorInternos(
           "Este usuario aún no tiene internos asignados"
         );
+
         return;
       }
 
@@ -85,19 +103,20 @@ export default function ReportForm() {
 
       try {
 
-        const respuesta = await fetch(ENDPOINT_INTERNOS, {
+        const respuesta = await fetch(
+          ENDPOINT_INTERNOS,
+          {
+            method: "POST",
 
-          method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
 
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-            dni: dni
-          })
-
-        });
+            body: JSON.stringify({
+              dni: dni
+            })
+          }
+        );
 
         if (!respuesta.ok) {
 
@@ -107,11 +126,15 @@ export default function ReportForm() {
 
         }
 
-const datos = await respuesta.json();
+        const datos = await respuesta.json();
 
-console.log("Respuesta de Power Automate:", datos);
+        console.log(
+          "Respuesta de Power Automate:",
+          datos
+        );
 
-setInternos(datos.internos || []);
+        setInternos(datos.internos || []);
+
       } catch (error) {
 
         console.error(
@@ -135,66 +158,83 @@ setInternos(datos.internos || []);
 
   }, [dni]);
 
-  // ------------------------------------------------------
+  // ======================================================
   // CAMBIO DE CAMPOS
-  // ------------------------------------------------------
+  // ======================================================
 
   const handleChange = (e) => {
 
     const { name, value } = e.target;
 
-    // Si cambia el interno
+    // ----------------------------------------------------
+    // SI CAMBIA EL INTERNO
+    // ----------------------------------------------------
+
     if (name === "interno") {
 
-      const internoSeleccionado = internos.find(
-  (item) => item.interno === value
-);
+      const internoSeleccionado =
+        internos.find(
+          (item) =>
+            String(item.interno) === String(value)
+        );
 
-      // Si encontramos los datos del interno
+      // --------------------------------------------------
+      // SI ENCONTRAMOS EL INTERNO
+      // --------------------------------------------------
+
       if (internoSeleccionado) {
 
-  setFormulario({
-    ...formulario,
+        setFormulario({
 
-    interno: internoSeleccionado.interno,
+          ...formulario,
 
-    equipo: internoSeleccionado.equipo,
+          interno:
+            internoSeleccionado.interno,
 
-    marca: internoSeleccionado.marca,
+          equipo:
+            internoSeleccionado.equipo || "",
 
-    modelo: internoSeleccionado.modelo,
+          marca:
+            internoSeleccionado.marca || "",
 
-    codigoObra: internoSeleccionado.codigoObra,
+          modelo:
+            internoSeleccionado.modelo || "",
 
-    nombreObra: internoSeleccionado.nombreObra,
+          codigoObra:
+            internoSeleccionado.codigoObra || "",
 
-    horas: ""
-  });
+          nombreObra:
+            internoSeleccionado.nombreObra || "",
 
+          horas: ""
 
+        });
 
-      }else {
+      } else {
 
-  setFormulario({
+        setFormulario({
 
-    ...formulario,
+          ...formulario,
 
-    interno: value,
+          interno: value,
 
-    equipo: "",
-    marca: "",
-    modelo: "",
-    codigoObra: "",
-    nombreObra: "",
-    horas: ""
+          equipo: "",
+          marca: "",
+          modelo: "",
+          codigoObra: "",
+          nombreObra: "",
+          horas: ""
 
-  });
+        });
 
-}
+      }
 
       return;
-
     }
+
+    // ----------------------------------------------------
+    // RESTO DE LOS CAMPOS
+    // ----------------------------------------------------
 
     setFormulario({
 
@@ -206,9 +246,47 @@ setInternos(datos.internos || []);
 
   };
 
-  // ------------------------------------------------------
+  // ======================================================
+  // SELECCIONAR FOTOGRAFÍAS
+  // ======================================================
+
+  const handleFotos = (e) => {
+
+    const archivos = Array.from(
+      e.target.files
+    );
+
+    if (archivos.length === 0) {
+      return;
+    }
+
+    setFotos((fotosActuales) => [
+      ...fotosActuales,
+      ...archivos
+    ]);
+
+    // Permite volver a seleccionar las mismas fotos
+    e.target.value = "";
+
+  };
+
+  // ======================================================
+  // ELIMINAR FOTOGRAFÍA
+  // ======================================================
+
+  const eliminarFoto = (index) => {
+
+    setFotos((fotosActuales) =>
+      fotosActuales.filter(
+        (_, i) => i !== index
+      )
+    );
+
+  };
+
+  // ======================================================
   // ENVIAR REPORTE
-  // ------------------------------------------------------
+  // ======================================================
 
   const enviarReporte = () => {
 
@@ -216,59 +294,80 @@ setInternos(datos.internos || []);
 
     const parametros = {
 
-      correo: localStorage.getItem("correo"),
+      correo:
+        localStorage.getItem("correo") || "",
 
       dni: dni,
 
-      equipo: formulario.equipo,
+      equipo:
+        formulario.equipo,
 
-      interno: formulario.interno,
+      interno:
+        formulario.interno,
 
-      obra: formulario.obra,
+      obra:
+        formulario.nombreObra,
 
-      horas: formulario.horas,
+      horas:
+        formulario.horas,
 
-      sistema: formulario.sistema,
+      sistema:
+        formulario.sistema,
 
-      criticidad: formulario.criticidad,
+      criticidad:
+        formulario.criticidad,
 
-      detenido: formulario.detenido,
+      detenido:
+        formulario.detenido,
 
-      descripcion: formulario.descripcion,
+      descripcion:
+        formulario.descripcion,
 
-      fecha: fecha.toLocaleDateString("es-AR"),
+      fecha:
+        fecha.toLocaleDateString("es-AR"),
 
-      hora: fecha.toLocaleTimeString("es-AR")
+      hora:
+        fecha.toLocaleTimeString("es-AR")
 
     };
 
+    console.log(
+      "Datos enviados:",
+      parametros
+    );
+
+    console.log(
+      "Fotografías seleccionadas:",
+      fotos
+    );
+
     emailjs.send(
-
       "service_q4olojs",
-
       "template_pkwo1pj",
-
       parametros,
-
       "J8VbYGxQmJyTpuJWP"
-
     )
+      .then(() => {
 
-    .then(() => {
+        alert(
+          "✅ Reporte enviado correctamente"
+        );
 
-      alert("✅ Reporte enviado correctamente");
+        navigate("/home");
 
-      navigate("/home");
+      })
+      .catch((error) => {
 
-    })
+        console.error(
+          "Error enviando reporte:",
+          error
+        );
 
-    .catch((error) => {
+        alert(
+          "Error al enviar el reporte"
+        );
 
-      console.log(error);
-
-      alert("Error al enviar el reporte");
-
-    });
+      });
 
   };
 
@@ -312,7 +411,8 @@ setInternos(datos.internos || []);
             width: 220,
             height: 220,
             borderRadius: "50%",
-            background: "rgba(22,163,74,0.05)"
+            background:
+              "rgba(22,163,74,0.05)"
           }}
         />
 
@@ -324,7 +424,8 @@ setInternos(datos.internos || []);
             width: 170,
             height: 170,
             borderRadius: "50%",
-            background: "rgba(22,163,74,0.08)"
+            background:
+              "rgba(22,163,74,0.08)"
           }}
         />
 
@@ -340,7 +441,9 @@ setInternos(datos.internos || []);
         >
 
           <ArrowBackIosNewRoundedIcon
-            onClick={() => navigate("/home")}
+            onClick={() =>
+              navigate("/home")
+            }
             sx={{
               color: "#16A34A",
               cursor: "pointer"
@@ -351,10 +454,14 @@ setInternos(datos.internos || []);
             variant="outlined"
             color="error"
             size="small"
-            startIcon={<LogoutRoundedIcon />}
+            startIcon={
+              <LogoutRoundedIcon />
+            }
             onClick={() => {
 
-              localStorage.removeItem("dni");
+              localStorage.removeItem(
+                "dni"
+              );
 
               navigate("/");
 
@@ -478,810 +585,1064 @@ setInternos(datos.internos || []);
 
       </Paper>
 
-  {/* ======================================================
-    01 — EQUIPO
-====================================================== */}
+      {/* ======================================================
+          01 — EQUIPO
+      ====================================================== */}
 
-<Paper
-  elevation={0}
-  sx={{
-    p: { xs: 2.5, sm: 3.5 },
-    borderRadius: 4,
-    border: "1px solid #E2E8F0",
-    mb: 3,
-    background: "#FFFFFF",
-  }}
->
-  {/* ENCABEZADO */}
-
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 1.5,
-      mb: 1,
-    }}
-  >
-    <Box
-      sx={{
-        width: 34,
-        height: 34,
-        borderRadius: "10px",
-        background: "#F0FDF4",
-        color: "#16A34A",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 800,
-        fontSize: 14,
-      }}
-    >
-      01
-    </Box>
-
-    <Box>
-      <Typography
+      <Paper
+        elevation={0}
         sx={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: "#1F2937",
-          lineHeight: 1.2,
-        }}
-      >
-        Equipo
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: "#64748B",
-          mt: 0.3,
-        }}
-      >
-        Seleccione el equipo sobre el que desea reportar
-      </Typography>
-    </Box>
-  </Box>
-
-  {/* SELECTOR */}
-
-  <Box sx={{ mt: 3 }}>
-    <Typography
-      sx={{
-        fontSize: 13,
-        fontWeight: 700,
-        color: "#334155",
-        mb: 1,
-      }}
-    >
-      Interno
-    </Typography>
-
-    <TextField
-      select
-      fullWidth
-      name="interno"
-      value={formulario.interno}
-      onChange={handleChange}
-      disabled={cargandoInternos}
-      error={Boolean(errorInternos)}
-      helperText={
-        errorInternos
-          ? errorInternos
-          : cargandoInternos
-            ? "Buscando internos asignados..."
-            : internos.length > 0
-              ? `${internos.length} interno(s) disponible(s)`
-              : "No hay internos asignados"
-      }
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 3,
-          background: "#F8FAFC",
-          minHeight: 56,
-          transition: "all .2s ease",
-
-          "&:hover": {
-            background: "#F1F5F9",
+          p: {
+            xs: 2.5,
+            sm: 3.5
           },
-
-          "&.Mui-focused": {
-            background: "#FFFFFF",
-          },
-        },
-
-        "& .MuiFormHelperText-root": {
-          ml: 0.5,
-        },
-      }}
-    >
-      <MenuItem value="">
-        {cargandoInternos
-          ? "Cargando internos..."
-          : "Seleccione un interno"}
-      </MenuItem>
-
-      {internos.map((item, index) => {
-        const interno =
-          item.interno ??
-          item.Interno ??
-          item.intern ??
-          item.id ??
-          item;
-
-        return (
-          <MenuItem
-            key={index}
-            value={String(interno)}
-          >
-            Interno {String(interno)}
-          </MenuItem>
-        );
-      })}
-    </TextField>
-  </Box>
-
-  {/* ==================================================
-      TARJETA EQUIPO SELECCIONADO
-  ================================================== */}
-
-  {formulario.interno && (
-    <Box
-      sx={{
-        mt: 3,
-        borderRadius: 3.5,
-        border: "1px solid #DDEDE4",
-        overflow: "hidden",
-        background: "#F8FAFC",
-      }}
-    >
-      {/* CABECERA EQUIPO */}
-
-      <Box
-        sx={{
-          p: { xs: 2.5, sm: 3 },
-          background:
-            "linear-gradient(135deg, #F0FDF4 0%, #F8FAFC 100%)",
-          borderBottom: "1px solid #E2E8F0",
+          borderRadius: 4,
+          border: "1px solid #E2E8F0",
+          mb: 3,
+          background: "#FFFFFF"
         }}
       >
-        <Typography
-          sx={{
-            fontSize: 11,
-            fontWeight: 800,
-            color: "#16A34A",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          Equipo seleccionado
-        </Typography>
 
-        <Typography
-          sx={{
-            fontSize: { xs: 21, sm: 23 },
-            fontWeight: 750,
-            color: "#1F2937",
-            mt: 0.6,
-          }}
-        >
-          {formulario.equipo || "Equipo"}
-        </Typography>
+        {/* ENCABEZADO */}
 
         <Box
           sx={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            mt: 1,
-            px: 1.5,
-            py: 0.6,
-            borderRadius: 2,
-            background: "#FFFFFF",
-            border: "1px solid #DDEDE4",
+            gap: 1.5,
+            mb: 1
           }}
         >
-          <Typography
+
+          <Box
             sx={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#475569",
+              width: 34,
+              height: 34,
+              borderRadius: "10px",
+              background: "#F0FDF4",
+              color: "#16A34A",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 800,
+              fontSize: 14
             }}
           >
-            Interno {formulario.interno}
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* DATOS DEL EQUIPO */}
-
-      <Box
-        sx={{
-          p: { xs: 2.5, sm: 3 },
-        }}
-      >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr 1fr",
-              sm: "repeat(4, 1fr)",
-            },
-            gap: 2,
-          }}
-        >
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#94A3B8",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              Marca
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 0.5,
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#334155",
-              }}
-            >
-              {formulario.marca || "-"}
-            </Typography>
+            01
           </Box>
 
           <Box>
+
             <Typography
               sx={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#94A3B8",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#1F2937",
+                lineHeight: 1.2
               }}
             >
-              Modelo
+              Equipo
             </Typography>
 
             <Typography
               sx={{
-                mt: 0.5,
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#334155",
+                fontSize: 13,
+                color: "#64748B",
+                mt: 0.3
               }}
             >
-              {formulario.modelo || "-"}
+              Seleccione el equipo sobre el que desea reportar
             </Typography>
+
           </Box>
 
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#94A3B8",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              Código
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 0.5,
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#334155",
-              }}
-            >
-              {formulario.codigoObra || "-"}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 10,
-                fontWeight: 800,
-                color: "#94A3B8",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              Obra
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 0.5,
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#334155",
-              }}
-            >
-              {formulario.nombreObra || "-"}
-            </Typography>
-          </Box>
         </Box>
 
-        {/* HORÓMETRO */}
+        {/* SELECTOR */}
 
-        <Box
-          sx={{
-            mt: 3,
-            pt: 2.5,
-            borderTop: "1px solid #E2E8F0",
-          }}
-        >
+        <Box sx={{ mt: 3 }}>
+
           <Typography
             sx={{
               fontSize: 13,
               fontWeight: 700,
               color: "#334155",
-              mb: 1,
+              mb: 1
             }}
           >
-            Horómetro actual
+            Interno
+          </Typography>
+
+          <TextField
+            select
+            fullWidth
+            name="interno"
+            value={formulario.interno}
+            onChange={handleChange}
+            disabled={cargandoInternos}
+            error={Boolean(errorInternos)}
+            helperText={
+              errorInternos
+                ? errorInternos
+                : cargandoInternos
+                  ? "Buscando internos asignados..."
+                  : internos.length > 0
+                    ? `${internos.length} interno(s) disponible(s)`
+                    : "No hay internos asignados"
+            }
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 3,
+                background: "#F8FAFC",
+                minHeight: 56,
+                transition:
+                  "all .2s ease",
+
+                "&:hover": {
+                  background: "#F1F5F9"
+                },
+
+                "&.Mui-focused": {
+                  background: "#FFFFFF"
+                }
+              },
+
+              "& .MuiFormHelperText-root": {
+                ml: 0.5
+              }
+            }}
+          >
+
+            <MenuItem value="">
+              {cargandoInternos
+                ? "Cargando internos..."
+                : "Seleccione un interno"}
+            </MenuItem>
+
+            {internos.map(
+              (item, index) => {
+
+                const interno =
+                  item.interno ??
+                  item.Interno ??
+                  item.intern ??
+                  item.id ??
+                  item;
+
+                return (
+
+                  <MenuItem
+                    key={index}
+                    value={String(interno)}
+                  >
+                    Interno{" "}
+                    {String(interno)}
+                  </MenuItem>
+
+                );
+
+              }
+            )}
+
+          </TextField>
+
+        </Box>
+
+        {/* TARJETA EQUIPO */}
+
+        {formulario.interno && (
+
+          <Box
+            sx={{
+              mt: 3,
+              borderRadius: 3.5,
+              border:
+                "1px solid #DDEDE4",
+              overflow: "hidden",
+              background: "#F8FAFC"
+            }}
+          >
+
+            {/* CABECERA */}
+
+            <Box
+              sx={{
+                p: {
+                  xs: 2.5,
+                  sm: 3
+                },
+                background:
+                  "linear-gradient(135deg, #F0FDF4 0%, #F8FAFC 100%)",
+                borderBottom:
+                  "1px solid #E2E8F0"
+              }}
+            >
+
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: "#16A34A",
+                  letterSpacing: 1,
+                  textTransform:
+                    "uppercase"
+                }}
+              >
+                Equipo seleccionado
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontSize: {
+                    xs: 21,
+                    sm: 23
+                  },
+                  fontWeight: 750,
+                  color: "#1F2937",
+                  mt: 0.6
+                }}
+              >
+                {formulario.equipo ||
+                  "Equipo"}
+              </Typography>
+
+              <Box
+                sx={{
+                  display:
+                    "inline-flex",
+                  alignItems: "center",
+                  mt: 1,
+                  px: 1.5,
+                  py: 0.6,
+                  borderRadius: 2,
+                  background: "#FFFFFF",
+                  border:
+                    "1px solid #DDEDE4"
+                }}
+              >
+
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#475569"
+                  }}
+                >
+                  Interno{" "}
+                  {formulario.interno}
+                </Typography>
+
+              </Box>
+
+            </Box>
+
+            {/* DATOS */}
+
+            <Box
+              sx={{
+                p: {
+                  xs: 2.5,
+                  sm: 3
+                }
+              }}
+            >
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr 1fr",
+                    sm: "repeat(4, 1fr)"
+                  },
+                  gap: 2
+                }}
+              >
+
+                <Box>
+
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#94A3B8",
+                      textTransform:
+                        "uppercase",
+                      letterSpacing: 0.5
+                    }}
+                  >
+                    Marca
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.5,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: "#334155"
+                    }}
+                  >
+                    {formulario.marca ||
+                      "-"}
+                  </Typography>
+
+                </Box>
+
+                <Box>
+
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#94A3B8",
+                      textTransform:
+                        "uppercase",
+                      letterSpacing: 0.5
+                    }}
+                  >
+                    Modelo
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.5,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: "#334155"
+                    }}
+                  >
+                    {formulario.modelo ||
+                      "-"}
+                  </Typography>
+
+                </Box>
+
+                <Box>
+
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#94A3B8",
+                      textTransform:
+                        "uppercase",
+                      letterSpacing: 0.5
+                    }}
+                  >
+                    Código
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.5,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: "#334155"
+                    }}
+                  >
+                    {formulario.codigoObra ||
+                      "-"}
+                  </Typography>
+
+                </Box>
+
+                <Box>
+
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#94A3B8",
+                      textTransform:
+                        "uppercase",
+                      letterSpacing: 0.5
+                    }}
+                  >
+                    Obra
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.5,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: "#334155"
+                    }}
+                  >
+                    {formulario.nombreObra ||
+                      "-"}
+                  </Typography>
+
+                </Box>
+
+              </Box>
+
+              {/* HORÓMETRO */}
+
+              <Box
+                sx={{
+                  mt: 3,
+                  pt: 2.5,
+                  borderTop:
+                    "1px solid #E2E8F0"
+                }}
+              >
+
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#334155",
+                    mb: 1
+                  }}
+                >
+                  Horómetro actual
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  name="horas"
+                  value={formulario.horas}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="Ej. 12450"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      background:
+                        "#FFFFFF"
+                    }
+                  }}
+                />
+
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: "#94A3B8",
+                    mt: 1
+                  }}
+                >
+                  Ingrese las horas que indica actualmente el equipo.
+                </Typography>
+
+              </Box>
+
+            </Box>
+
+          </Box>
+
+        )}
+
+      </Paper>
+
+      {/* ======================================================
+          02 — NOVEDAD
+      ====================================================== */}
+
+      <Paper
+        elevation={0}
+        sx={{
+          p: {
+            xs: 2.5,
+            sm: 3.5
+          },
+          borderRadius: 4,
+          border:
+            "1px solid #E2E8F0",
+          mb: 3,
+          background: "#FFFFFF"
+        }}
+      >
+
+        {/* ENCABEZADO */}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3
+          }}
+        >
+
+          <Box
+            sx={{
+              width: 34,
+              height: 34,
+              borderRadius: "10px",
+              background: "#F0FDF4",
+              color: "#16A34A",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 800,
+              fontSize: 14
+            }}
+          >
+            02
+          </Box>
+
+          <Box>
+
+            <Typography
+              sx={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#1F2937",
+                lineHeight: 1.2
+              }}
+            >
+              Novedad
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 13,
+                color: "#64748B",
+                mt: 0.3
+              }}
+            >
+              Indique qué está ocurriendo con el equipo
+            </Typography>
+
+          </Box>
+
+        </Box>
+
+        {/* SISTEMA */}
+
+        <Typography
+          sx={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#334155",
+            mb: 1
+          }}
+        >
+          Sistema afectado
+        </Typography>
+
+        <TextField
+          select
+          fullWidth
+          name="sistema"
+          value={formulario.sistema}
+          onChange={handleChange}
+          sx={{
+            mb: 3,
+
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 3,
+              background: "#F8FAFC"
+            }
+          }}
+        >
+
+          <MenuItem value="">
+            Seleccione el sistema
+          </MenuItem>
+
+          <MenuItem value="Motor">
+            Motor
+          </MenuItem>
+
+          <MenuItem value="Hidráulico">
+            Hidráulico
+          </MenuItem>
+
+          <MenuItem value="Eléctrico">
+            Eléctrico
+          </MenuItem>
+
+          <MenuItem value="Neumáticos">
+            Neumáticos
+          </MenuItem>
+
+          <MenuItem value="Pluma">
+            Pluma
+          </MenuItem>
+
+          <MenuItem value="Otro">
+            Otro
+          </MenuItem>
+
+        </TextField>
+
+        {/* CRITICIDAD */}
+
+        <Typography
+          sx={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#334155",
+            mb: 1.5
+          }}
+        >
+          Nivel de criticidad
+        </Typography>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(3, 1fr)"
+            },
+            gap: 1.5,
+            mb: 3
+          }}
+        >
+
+          {[
+            "Baja",
+            "Media",
+            "Alta"
+          ].map((nivel) => (
+
+            <Button
+              key={nivel}
+              variant="outlined"
+              onClick={() =>
+                setFormulario({
+                  ...formulario,
+                  criticidad: nivel
+                })
+              }
+              sx={{
+                py: 1.5,
+                borderRadius: 3,
+                textTransform:
+                  "none",
+                fontWeight: 700,
+
+                borderColor:
+                  formulario.criticidad ===
+                  nivel
+                    ? "#16A34A"
+                    : "#E2E8F0",
+
+                color:
+                  formulario.criticidad ===
+                  nivel
+                    ? "#15803D"
+                    : "#64748B",
+
+                background:
+                  formulario.criticidad ===
+                  nivel
+                    ? "#F0FDF4"
+                    : "#FFFFFF",
+
+                "&:hover": {
+                  borderColor:
+                    "#16A34A",
+                  background:
+                    "#F0FDF4"
+                }
+              }}
+            >
+              {nivel}
+            </Button>
+
+          ))}
+
+        </Box>
+
+        {/* EQUIPO DETENIDO */}
+
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            background: "#F8FAFC",
+            border:
+              "1px solid #E2E8F0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent:
+              "space-between",
+            gap: 2
+          }}
+        >
+
+          <Box>
+
+            <Typography
+              sx={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: "#334155"
+              }}
+            >
+              ¿El equipo quedó detenido?
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 12,
+                color: "#94A3B8",
+                mt: 0.3
+              }}
+            >
+              Indique si la falla impide continuar trabajando.
+            </Typography>
+
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              p: 0.5,
+              borderRadius: 2.5,
+              background: "#E2E8F0",
+              flexShrink: 0
+            }}
+          >
+
+            {[
+              "No",
+              "Sí"
+            ].map((opcion) => (
+
+              <Button
+                key={opcion}
+                onClick={() =>
+                  setFormulario({
+                    ...formulario,
+                    detenido: opcion
+                  })
+                }
+                sx={{
+                  minWidth: 55,
+                  borderRadius: 2,
+                  py: 0.7,
+                  textTransform:
+                    "none",
+                  fontWeight: 700,
+                  fontSize: 13,
+
+                  background:
+                    formulario.detenido ===
+                    opcion
+                      ? "#FFFFFF"
+                      : "transparent",
+
+                  color:
+                    formulario.detenido ===
+                    opcion
+                      ? "#16A34A"
+                      : "#64748B",
+
+                  boxShadow:
+                    formulario.detenido ===
+                    opcion
+                      ? "0 1px 4px rgba(15,23,42,0.08)"
+                      : "none",
+
+                  "&:hover": {
+                    background:
+                      "#FFFFFF"
+                  }
+                }}
+              >
+                {opcion}
+              </Button>
+
+            ))}
+
+          </Box>
+
+        </Box>
+
+        {/* DESCRIPCIÓN */}
+
+        <Box sx={{ mt: 3 }}>
+
+          <Typography
+            sx={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#334155",
+              mb: 1
+            }}
+          >
+            Descripción de la novedad
           </Typography>
 
           <TextField
             fullWidth
-            name="horas"
-            value={formulario.horas}
+            multiline
+            rows={5}
+            name="descripcion"
+            value={formulario.descripcion}
             onChange={handleChange}
-            type="number"
-            placeholder="Ej. 12450"
+            placeholder="Describa detalladamente la falla detectada..."
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 3,
-                background: "#FFFFFF",
-              },
+                background: "#F8FAFC"
+              }
             }}
           />
 
-          <Typography
-            sx={{
-              fontSize: 12,
-              color: "#94A3B8",
-              mt: 1,
-            }}
-          >
-            Ingrese las horas que indica actualmente el equipo.
-          </Typography>
         </Box>
-      </Box>
-    </Box>
-  )}
-</Paper>
 
+      </Paper>
 
-{/* ======================================================
-    02 — NOVEDAD
-====================================================== */}
+      {/* ======================================================
+          03 — EVIDENCIA
+      ====================================================== */}
 
-<Paper
-  elevation={0}
-  sx={{
-    p: { xs: 2.5, sm: 3.5 },
-    borderRadius: 4,
-    border: "1px solid #E2E8F0",
-    mb: 3,
-    background: "#FFFFFF",
-  }}
->
-  {/* ENCABEZADO */}
-
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 1.5,
-      mb: 3,
-    }}
-  >
-    <Box
-      sx={{
-        width: 34,
-        height: 34,
-        borderRadius: "10px",
-        background: "#F0FDF4",
-        color: "#16A34A",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 800,
-        fontSize: 14,
-      }}
-    >
-      02
-    </Box>
-
-    <Box>
-      <Typography
+      <Paper
+        elevation={0}
         sx={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: "#1F2937",
-          lineHeight: 1.2,
-        }}
-      >
-        Novedad
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: "#64748B",
-          mt: 0.3,
-        }}
-      >
-        Indique qué está ocurriendo con el equipo
-      </Typography>
-    </Box>
-  </Box>
-
-  {/* SISTEMA */}
-
-  <Typography
-    sx={{
-      fontSize: 13,
-      fontWeight: 700,
-      color: "#334155",
-      mb: 1,
-    }}
-  >
-    Sistema afectado
-  </Typography>
-
-  <TextField
-    select
-    fullWidth
-    name="sistema"
-    value={formulario.sistema}
-    onChange={handleChange}
-    sx={{
-      mb: 3,
-      "& .MuiOutlinedInput-root": {
-        borderRadius: 3,
-        background: "#F8FAFC",
-      },
-    }}
-  >
-    <MenuItem value="">
-      Seleccione el sistema
-    </MenuItem>
-
-    <MenuItem value="Motor">
-      Motor
-    </MenuItem>
-
-    <MenuItem value="Hidráulico">
-      Hidráulico
-    </MenuItem>
-
-    <MenuItem value="Eléctrico">
-      Eléctrico
-    </MenuItem>
-
-    <MenuItem value="Neumáticos">
-      Neumáticos
-    </MenuItem>
-
-    <MenuItem value="Pluma">
-      Pluma
-    </MenuItem>
-
-    <MenuItem value="Otro">
-      Otro
-    </MenuItem>
-  </TextField>
-
-
-  {/* CRITICIDAD */}
-
-  <Typography
-    sx={{
-      fontSize: 13,
-      fontWeight: 700,
-      color: "#334155",
-      mb: 1.5,
-    }}
-  >
-    Nivel de criticidad
-  </Typography>
-
-  <Box
-    sx={{
-      display: "grid",
-      gridTemplateColumns: {
-        xs: "1fr",
-        sm: "repeat(3, 1fr)",
-      },
-      gap: 1.5,
-      mb: 3,
-    }}
-  >
-    {["Baja", "Media", "Alta"].map((nivel) => (
-      <Button
-        key={nivel}
-        variant="outlined"
-        onClick={() =>
-          setFormulario({
-            ...formulario,
-            criticidad: nivel,
-          })
-        }
-        sx={{
-          py: 1.5,
-          borderRadius: 3,
-          textTransform: "none",
-          fontWeight: 700,
-          borderColor:
-            formulario.criticidad === nivel
-              ? "#16A34A"
-              : "#E2E8F0",
-          color:
-            formulario.criticidad === nivel
-              ? "#15803D"
-              : "#64748B",
-          background:
-            formulario.criticidad === nivel
-              ? "#F0FDF4"
-              : "#FFFFFF",
-
-          "&:hover": {
-            borderColor: "#16A34A",
-            background: "#F0FDF4",
+          p: {
+            xs: 2.5,
+            sm: 3.5
           },
+          borderRadius: 4,
+          border:
+            "1px solid #E2E8F0",
+          mb: 4,
+          background: "#FFFFFF"
         }}
       >
-        {nivel}
-      </Button>
-    ))}
-  </Box>
 
+        {/* ENCABEZADO */}
 
-  {/* EQUIPO DETENIDO */}
-
-  <Box
-    sx={{
-      p: 2,
-      borderRadius: 3,
-      background: "#F8FAFC",
-      border: "1px solid #E2E8F0",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 2,
-    }}
-  >
-    <Box>
-      <Typography
-        sx={{
-          fontSize: 14,
-          fontWeight: 700,
-          color: "#334155",
-        }}
-      >
-        ¿El equipo quedó detenido?
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 12,
-          color: "#94A3B8",
-          mt: 0.3,
-        }}
-      >
-        Indique si la falla impide continuar trabajando.
-      </Typography>
-    </Box>
-
-    <Box
-      sx={{
-        display: "flex",
-        gap: 0.5,
-        p: 0.5,
-        borderRadius: 2.5,
-        background: "#E2E8F0",
-        flexShrink: 0,
-      }}
-    >
-      {["No", "Sí"].map((opcion) => (
-        <Button
-          key={opcion}
-          onClick={() =>
-            setFormulario({
-              ...formulario,
-              detenido: opcion,
-            })
-          }
+        <Box
           sx={{
-            minWidth: 55,
-            borderRadius: 2,
-            py: 0.7,
-            textTransform: "none",
-            fontWeight: 700,
-            fontSize: 13,
-            background:
-              formulario.detenido === opcion
-                ? "#FFFFFF"
-                : "transparent",
-            color:
-              formulario.detenido === opcion
-                ? "#16A34A"
-                : "#64748B",
-            boxShadow:
-              formulario.detenido === opcion
-                ? "0 1px 4px rgba(15,23,42,0.08)"
-                : "none",
-
-            "&:hover": {
-              background: "#FFFFFF",
-            },
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3
           }}
         >
-          {opcion}
+
+          <Box
+            sx={{
+              width: 34,
+              height: 34,
+              borderRadius: "10px",
+              background: "#F0FDF4",
+              color: "#16A34A",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 800,
+              fontSize: 14
+            }}
+          >
+            03
+          </Box>
+
+          <Box>
+
+            <Typography
+              sx={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#1F2937",
+                lineHeight: 1.2
+              }}
+            >
+              Evidencia
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 13,
+                color: "#64748B",
+                mt: 0.3
+              }}
+            >
+              Agregue fotografías que ayuden a identificar la falla
+            </Typography>
+
+          </Box>
+
+        </Box>
+
+        {/* ==================================================
+            BOTÓN FOTOGRAFÍAS
+        ================================================== */}
+
+        <Button
+          component="label"
+          fullWidth
+          variant="outlined"
+          startIcon={
+            <PhotoCameraIcon />
+          }
+          sx={{
+            py: 2,
+            borderRadius: 3,
+            textTransform:
+              "none",
+            fontWeight: 700,
+            fontSize: 14,
+            borderColor: "#BBF7D0",
+            color: "#15803D",
+            background: "#F0FDF4",
+
+            "&:hover": {
+              borderColor:
+                "#86EFAC",
+              background:
+                "#DCFCE7"
+            }
+          }}
+        >
+
+          Agregar fotografías
+
+          <input
+            hidden
+            type="file"
+            multiple
+            accept="image/*"
+            capture="environment"
+            onChange={handleFotos}
+          />
+
         </Button>
-      ))}
-    </Box>
-  </Box>
 
+        <Typography
+          sx={{
+            textAlign: "center",
+            fontSize: 12,
+            color: "#94A3B8",
+            mt: 1.5
+          }}
+        >
+          Puede seleccionar una o varias fotografías
+        </Typography>
 
-  {/* DESCRIPCIÓN */}
+        {/* ==================================================
+            PREVISUALIZACIÓN
+        ================================================== */}
 
-  <Box sx={{ mt: 3 }}>
-    <Typography
-      sx={{
-        fontSize: 13,
-        fontWeight: 700,
-        color: "#334155",
-        mb: 1,
-      }}
-    >
-      Descripción de la novedad
-    </Typography>
+        {fotos.length > 0 && (
 
-    <TextField
-      fullWidth
-      multiline
-      rows={5}
-      name="descripcion"
-      value={formulario.descripcion}
-      onChange={handleChange}
-      placeholder="Describa detalladamente la falla detectada..."
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 3,
-          background: "#F8FAFC",
-        },
-      }}
-    />
-  </Box>
-</Paper>
+          <Box sx={{ mt: 3 }}>
 
+            <Typography
+              sx={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#334155",
+                mb: 1.5
+              }}
+            >
+              Fotografías seleccionadas (
+              {fotos.length}
+              )
+            </Typography>
 
-{/* ======================================================
-    03 — EVIDENCIA
-====================================================== */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "repeat(2, 1fr)",
+                  sm: "repeat(4, 1fr)"
+                },
+                gap: 1.5
+              }}
+            >
 
-<Paper
-  elevation={0}
-  sx={{
-    p: { xs: 2.5, sm: 3.5 },
-    borderRadius: 4,
-    border: "1px solid #E2E8F0",
-    mb: 4,
-    background: "#FFFFFF",
-  }}
->
-  {/* ENCABEZADO */}
+              {fotos.map(
+                (foto, index) => {
 
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 1.5,
-      mb: 3,
-    }}
-  >
-    <Box
-      sx={{
-        width: 34,
-        height: 34,
-        borderRadius: "10px",
-        background: "#F0FDF4",
-        color: "#16A34A",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 800,
-        fontSize: 14,
-      }}
-    >
-      03
-    </Box>
+                  const preview =
+                    URL.createObjectURL(
+                      foto
+                    );
 
-    <Box>
-      <Typography
-        sx={{
-          fontSize: 18,
-          fontWeight: 700,
-          color: "#1F2937",
-          lineHeight: 1.2,
-        }}
-      >
-        Evidencia
-      </Typography>
+                  return (
 
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: "#64748B",
-          mt: 0.3,
-        }}
-      >
-        Agregue fotografías que ayuden a identificar la falla
-      </Typography>
-    </Box>
-  </Box>
+                    <Box
+                      key={`${foto.name}-${index}`}
+                      sx={{
+                        position:
+                          "relative",
+                        aspectRatio:
+                          "1 / 1",
+                        borderRadius: 3,
+                        overflow:
+                          "hidden",
+                        border:
+                          "1px solid #E2E8F0",
+                        background:
+                          "#F8FAFC"
+                      }}
+                    >
 
+                      <Box
+                        component="img"
+                        src={preview}
+                        alt={`Fotografía ${index + 1}`}
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit:
+                            "cover",
+                          display:
+                            "block"
+                        }}
+                      />
 
-  {/* BOTÓN FOTOGRAFÍAS */}
+                      {/* ELIMINAR */}
 
-  <Button
-    component="label"
-    fullWidth
-    variant="outlined"
-    startIcon={<PhotoCameraIcon />}
-    sx={{
-      py: 2,
-      borderRadius: 3,
-      textTransform: "none",
-      fontWeight: 700,
-      fontSize: 14,
-      borderColor: "#BBF7D0",
-      color: "#15803D",
-      background: "#F0FDF4",
+                      <Button
+                        onClick={() =>
+                          eliminarFoto(
+                            index
+                          )
+                        }
+                        sx={{
+                          position:
+                            "absolute",
+                          top: 6,
+                          right: 6,
+                          minWidth: 28,
+                          width: 28,
+                          height: 28,
+                          p: 0,
+                          borderRadius:
+                            "50%",
+                          background:
+                            "rgba(0,0,0,0.65)",
+                          color:
+                            "#FFFFFF",
+                          fontSize: 16,
 
-      "&:hover": {
-        borderColor: "#86EFAC",
-        background: "#DCFCE7",
-      },
-    }}
-  >
-    Agregar fotografías
+                          "&:hover": {
+                            background:
+                              "rgba(0,0,0,0.8)"
+                          }
+                        }}
+                      >
+                        ×
+                      </Button>
 
-    <input
-      hidden
-      type="file"
-      multiple
-      accept="image/*"
-      capture="environment"
-    />
-  </Button>
+                    </Box>
 
-  <Typography
-    sx={{
-      textAlign: "center",
-      fontSize: 12,
-      color: "#94A3B8",
-      mt: 1.5,
-    }}
-  >
-    Puede seleccionar una o varias fotografías
-  </Typography>
-</Paper>
+                  );
 
-      {/* ==================================================
+                }
+              )}
+
+            </Box>
+
+          </Box>
+
+        )}
+
+      </Paper>
+
+      {/* ======================================================
           ENVIAR
-      ================================================== */}
+      ====================================================== */}
 
       <Button
         fullWidth
@@ -1297,8 +1658,11 @@ setInternos(datos.internos || []);
           background: "#16A34A",
           fontWeight: 700,
           fontSize: 16,
-          textTransform: "none",
-          boxShadow: "0 8px 18px rgba(22,163,74,0.25)",
+          textTransform:
+            "none",
+          boxShadow:
+            "0 8px 18px rgba(22,163,74,0.25)",
+
           "&:hover": {
             background: "#15803D"
           }
