@@ -43,18 +43,17 @@ export default function ReportForm() {
   // ======================================================
 
   const [formulario, setFormulario] = useState({
-    interno: "",
-    equipo: "",
-    marca: "",
-    modelo: "",
-    codigoObra: "",
-    nombreObra: "",
-    horas: "",
-    sistema: "",
-    criticidad: "",
-    detenido: "",
-    descripcion: ""
-  });
+  interno: "",
+  equipo: "",
+  marca: "",
+  modelo: "",
+  codigoObra: "",
+  nombreObra: "",
+  sistema: "",
+  criticidad: "",
+  detenido: "",
+  descripcion: ""
+});
 
   // ======================================================
   // INTERNOS DEL OPERADOR
@@ -73,6 +72,7 @@ export default function ReportForm() {
   // ======================================================
 
   const [fotos, setFotos] = useState([]);
+  const [fotoHorometro, setFotoHorometro] = useState(null);
 const [enviando, setEnviando] = useState(false);
   // ======================================================
   // OBTENER INTERNOS DESDE POWER AUTOMATE
@@ -211,7 +211,7 @@ const [enviando, setEnviando] = useState(false);
           nombreObra:
             internoSeleccionado.nombreObra || "",
 
-          horas: ""
+          
 
         });
 
@@ -228,7 +228,6 @@ const [enviando, setEnviando] = useState(false);
           modelo: "",
           codigoObra: "",
           nombreObra: "",
-          horas: ""
 
         });
 
@@ -273,6 +272,27 @@ const [enviando, setEnviando] = useState(false);
     // Permite volver a seleccionar las mismas fotos
     e.target.value = "";
 
+  };
+
+  // ======================================================
+  // FOTO DEL HORÓMETRO
+  // ======================================================
+
+  const handleFotoHorometro = (e) => {
+    const archivo = e.target.files?.[0];
+
+    if (!archivo) {
+      return;
+    }
+
+    setFotoHorometro(archivo);
+
+    // Permite volver a seleccionar la misma foto
+    e.target.value = "";
+  };
+
+  const eliminarFotoHorometro = () => {
+    setFotoHorometro(null);
   };
 
   // ======================================================
@@ -375,6 +395,11 @@ const enviarReporte = async () => {
       return;
     }
 
+    if (!fotoHorometro) {
+      alert("Tome una fotografía del horómetro actual.");
+      return;
+    }
+
     // ==================================================
     // ACTIVAR ESTADO DE ENVÍO
     // ==================================================
@@ -404,12 +429,14 @@ const enviarReporte = async () => {
 
     );
 
+    const contenidoHorometro =
+      await convertirImagenBase64(fotoHorometro);
+
     // ==================================================
     // DATOS QUE SE ENVÍAN A POWER AUTOMATE
     //
     // IMPORTANTE:
-    // NO SE ENVÍA "hora"
-    // NO SE ENVÍA "horas" POR AHORA
+    // SE ENVÍA LA FOTO DEL HORÓMETRO
     // ==================================================
 
     const datosReporte = {
@@ -448,6 +475,13 @@ const enviarReporte = async () => {
 
       descripcion:
         formulario.descripcion.trim(),
+
+      fotoHorometro: {
+        nombre:
+          fotoHorometro.name || "horometro.jpg",
+        contenido:
+          contenidoHorometro
+      },
 
       imagenes:
         imagenes
@@ -1192,11 +1226,9 @@ const enviarReporte = async () => {
                 sx={{
                   mt: 3,
                   pt: 2.5,
-                  borderTop:
-                    "1px solid #E2E8F0"
+                  borderTop: "1px solid #E2E8F0"
                 }}
               >
-
                 <Typography
                   sx={{
                     fontSize: 13,
@@ -1205,35 +1237,117 @@ const enviarReporte = async () => {
                     mb: 1
                   }}
                 >
-                  Horómetro actual
+                  Horómetro actual del equipo.
                 </Typography>
-
-                <TextField
-                  fullWidth
-                  name="horas"
-                  value={formulario.horas}
-                  onChange={handleChange}
-                  type="number"
-                  placeholder="Ej. 12450"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
-                      background:
-                        "#FFFFFF"
-                    }
-                  }}
-                />
 
                 <Typography
                   sx={{
                     fontSize: 12,
-                    color: "#94A3B8",
-                    mt: 1
+                    color: "#64748B",
+                    mb: 2
                   }}
                 >
-                  Ingrese las horas que indica actualmente el equipo.
+                  Horómetro actual del equipo.
                 </Typography>
 
+                {!fotoHorometro && (
+                  <Button
+                    component="label"
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<PhotoCameraIcon />}
+                    sx={{
+                      py: 2,
+                      borderRadius: 3,
+                      textTransform: "none",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      borderColor: "#BBF7D0",
+                      color: "#15803D",
+                      background: "#F0FDF4",
+
+                      "&:hover": {
+                        borderColor: "#86EFAC",
+                        background: "#DCFCE7"
+                      }
+                    }}
+                  >
+                    Adjuntar/Subir foto del horómetro
+
+                    <input
+                      hidden
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleFotoHorometro}
+                    />
+                  </Button>
+                )}
+
+                {fotoHorometro && (
+                  <Box sx={{ mt: 2 }}>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: "100%",
+                        maxWidth: 350,
+                        margin: "0 auto",
+                        aspectRatio: "1 / 1",
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        border: "1px solid #E2E8F0",
+                        background: "#F8FAFC"
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={URL.createObjectURL(fotoHorometro)}
+                        alt="Foto del horómetro"
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block"
+                        }}
+                      />
+
+                      <Button
+                        onClick={eliminarFotoHorometro}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          minWidth: 32,
+                          width: 32,
+                          height: 32,
+                          p: 0,
+                          borderRadius: "50%",
+                          background: "rgba(0,0,0,0.65)",
+                          color: "#FFFFFF",
+                          fontSize: 18,
+
+                          "&:hover": {
+                            background: "rgba(0,0,0,0.8)"
+                          }
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </Box>
+
+                    <Typography
+                      sx={{
+                        textAlign: "center",
+                        fontSize: 12,
+                        color: "#16A34A",
+                        mt: 1.5,
+                        fontWeight: 600
+                      }}
+                    >
+                      ✓ Foto del horómetro cargada
+                    </Typography>
+                  </Box>
+                )}
               </Box>
 
             </Box>

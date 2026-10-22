@@ -273,7 +273,7 @@ export default function Login() {
             color: "#334155",
           }}
         >
-          Correo electrónico
+          Usuario
         </Typography>
 
         <TextField
@@ -315,7 +315,7 @@ export default function Login() {
             color: "#334155",
           }}
         >
-          DNI
+          Contraseña
         </Typography>
 
         <TextField
@@ -385,7 +385,7 @@ export default function Login() {
               <ArrowForwardIcon />
             ) : null
           }
-          sx={{
+          sx={{  
             py: 1.8,
             borderRadius: 3,
             background: "#16A34A",
