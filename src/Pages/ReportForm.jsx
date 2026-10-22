@@ -1349,8 +1349,41 @@ const enviarReporte = async () => {
                   </Box>
                 )}
               </Box>
+              {/* LECTURA A REGISTRAR */}
+
+<Box sx={{ mt: 3 }}>
+  <Typography
+    sx={{
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#334155",
+      mb: 1
+    }}
+  >
+    Lectura a registrar (h)
+  </Typography>
+
+  <TextField
+    fullWidth
+    type="number"
+    value=""
+    placeholder=""
+    InputProps={{
+      readOnly: true
+    }}
+    sx={{
+      "& .MuiOutlinedInput-root": {
+        borderRadius: 3,
+        background: "#FFFFFF"
+      }
+    }}
+  />
+</Box>
 
             </Box>
+            
+
+
 
           </Box>
 
