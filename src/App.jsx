@@ -18,7 +18,6 @@ function App() {
 
         <Route path="/reportar" element={<ReportForm />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/historial" element={<Historial />} />
         <Route path="/horometros" element={<WeeklyReport />} />
 
       </Routes>

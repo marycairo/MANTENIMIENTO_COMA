@@ -265,81 +265,8 @@ export default function Home() {
 
 </Paper>
 
-      {/* Historial */}
+   
 
-      <Paper
-
-        elevation={0}
-
-        onClick={() => navigate("/historial")}
-
-        sx={{
-
-          display: "flex",
-
-          alignItems: "center",
-
-          p: 2.5,
-
-          borderRadius: 3,
-
-          border: "1px solid #DDEDE4",
-
-          cursor: "pointer",
-
-          transition: ".2s",
-
-          "&:hover": {
-
-            borderColor: "#16A34A",
-
-            background: "#FAFCFB"
-
-          }
-
-        }}
-
-      >
-
-        <HistoryRoundedIcon
-
-          sx={{
-
-            color: "#16A34A",
-
-            fontSize: 34,
-
-            mr: 2
-
-          }}
-
-        />
-
-        <Box flex={1}>
-
-          <Typography fontWeight={700}>
-            Historial de Reportes
-          </Typography>
-
-          <Typography
-            sx={{
-              color: "#64748B",
-              fontSize: 14,
-              mt: .3
-            }}
-          >
-            Consultar reportes enviados.
-          </Typography>
-
-        </Box>
-
-        <ChevronRightRoundedIcon
-          sx={{
-            color: "#94A3B8"
-          }}
-        />
-
-      </Paper>
 
     </Box>
 

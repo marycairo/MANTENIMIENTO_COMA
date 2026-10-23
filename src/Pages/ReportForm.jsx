@@ -74,6 +74,8 @@ export default function ReportForm() {
   const [fotos, setFotos] = useState([]);
   const [fotoHorometro, setFotoHorometro] = useState(null);
 const [enviando, setEnviando] = useState(false);
+const [lecturaHorometro, setLecturaHorometro] = useState("");
+
   // ======================================================
   // OBTENER INTERNOS DESDE POWER AUTOMATE
   // ======================================================
@@ -400,6 +402,17 @@ const enviarReporte = async () => {
       return;
     }
 
+    if (
+  lecturaHorometro.trim() === "" ||
+  !Number.isFinite(Number(lecturaHorometro)) ||
+  Number(lecturaHorometro) < 0
+) {
+  alert("Ingrese una lectura de horómetro válida.");
+  return;
+}
+
+    
+
     // ==================================================
     // ACTIVAR ESTADO DE ENVÍO
     // ==================================================
@@ -463,6 +476,9 @@ const enviarReporte = async () => {
 
       nombreObra:
         formulario.nombreObra || "",
+
+      lecturaHorometro: lecturaHorometro || "" ,
+
 
       sistemaAfectado:
         formulario.sistema || "",
@@ -1349,15 +1365,16 @@ const enviarReporte = async () => {
                   </Box>
                 )}
               </Box>
-              {/* LECTURA A REGISTRAR */}
+ 
+{/* LECTURA A REGISTRAR */}
 
 <Box sx={{ mt: 3 }}>
   <Typography
     sx={{
-      fontSize: 13,
+      fontSize: 14,
       fontWeight: 700,
       color: "#334155",
-      mb: 1
+      mb: 1.2
     }}
   >
     Lectura a registrar (h)
@@ -1366,19 +1383,29 @@ const enviarReporte = async () => {
   <TextField
     fullWidth
     type="number"
-    value=""
-    placeholder=""
-    InputProps={{
-      readOnly: true
+    name="lecturaHorometro"
+    value={lecturaHorometro}
+    onChange={(e) => setLecturaHorometro(e.target.value)}
+    placeholder="Ej.: 1250.5"
+    inputProps={{
+      min: 0,
+      step: "any"
     }}
     sx={{
       "& .MuiOutlinedInput-root": {
         borderRadius: 3,
-        background: "#FFFFFF"
+        background: "#FFFFFF",
+        minHeight: 56,
+        fontSize: 16
+      },
+      "& .MuiOutlinedInput-root.Mui-focused fieldset": {
+        borderColor: "#16A34A",
+        borderWidth: 2
       }
     }}
   />
 </Box>
+
 
             </Box>
             
