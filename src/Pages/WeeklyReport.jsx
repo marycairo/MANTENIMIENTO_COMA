@@ -290,6 +290,7 @@ export default function WeeklyReport() {
       return;
     }
     if (
+
   lecturaHorometro.trim() === "" ||
   !Number.isFinite(Number(lecturaHorometro)) ||
   Number(lecturaHorometro) < 0
@@ -336,7 +337,7 @@ export default function WeeklyReport() {
         motivo: formulario.motivo.trim(),
         obra: formulario.obra.trim(),
         observaciones: formulario.observaciones.trim(),
-          lecturaHorometro: lecturaHorometro,
+        lecturaHorometro: Number(lecturaHorometro),
 
         fotoHorometro: {
           nombre: imagen.name || "horometro.jpg",
